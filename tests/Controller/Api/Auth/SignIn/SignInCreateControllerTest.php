@@ -45,6 +45,25 @@ class SignInCreateControllerTest extends WebTestCase
 
     /**
      * @test
+     */
+    public function it_should_returns_code_401_with_bad_credentials(): void
+    {
+        /** @var User $user */
+        $user = $this->userRepository->findOneBy(['email' => 'john.doe@example.com']);
+        $content = ['email' => $user->getEmail(), 'password' => '*this-is-not-a-password*'];
+
+        $this->client->request(
+            method: 'POST',
+            uri: self::SIGN_IN_URI,
+            server: ['Content-Type' => 'application/json'],
+            content: json_encode($content)
+        );
+
+        $this->assertResponseStatusCodeSame(Response::HTTP_UNAUTHORIZED);
+    }
+
+    /**
+     * @test
      * @dataProvider invalidContent
      */
     public function it_should_returns_code_422_and_expected_response_structure_with_invalid_data(
