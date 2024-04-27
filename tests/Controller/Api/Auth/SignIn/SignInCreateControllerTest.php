@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Controller\Api\Auth\SignIn;
 
 use App\Entity\User;
+use App\Repository\UserRepository;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -16,7 +17,7 @@ class SignInCreateControllerTest extends WebTestCase
 
     private ?ObjectManager $entityManager;
     private KernelBrowser $client;
-    private $userRepository;
+    private UserRepository $userRepository;
 
     protected function setUp(): void
     {
@@ -81,13 +82,13 @@ class SignInCreateControllerTest extends WebTestCase
         $response = json_decode($this->client->getResponse()->getContent(), associative: true);
 
         $this->assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
-        $this->assertArrayHasKey('errors', $response);
-        $this->assertCount($errorCount, $response['errors']);
+        $this->assertArrayHasKey('error', $response);
+        $this->assertCount($errorCount, $response['error']);
 
         foreach (range(0, $errorCount - 1) as $index) {
-            $this->assertTrue(in_array('propertyPath', array_keys($response['errors'][$index])));
-            $this->assertTrue(in_array('message', array_keys($response['errors'][$index])));
-            $this->assertSame($propertyPath[$index], $response['errors'][$index]['propertyPath']);
+            $this->assertTrue(in_array('propertyPath', array_keys($response['error'][$index])));
+            $this->assertTrue(in_array('message', array_keys($response['error'][$index])));
+            $this->assertSame($propertyPath[$index], $response['error'][$index]['propertyPath']);
         }
     }
 

@@ -26,20 +26,18 @@ class SignInCreateController extends ApiController
     )]
     public function __invoke(
         Request $request,
-        RequestValidator $validator,
+        RequestValidator $requestValidator,
         SignInTransformer $signInTransformer
     ): JsonResponse {
         try {
             $requestData = $this->decodeRequest($request);
 
-            $signInRequest = $validator->validate(
+            $signInRequest = $requestValidator->validate(
                 new SignInCreateRequest($requestData['email'] ?? null, $requestData['password'] ?? null)
             );
 
             if ($signInRequest->hasViolations()) {
-                return ApiResponse::unprocessableEntity([
-                    'errors' => $signInRequest->getViolations(asArray: true),
-                ]);
+                return ApiResponse::unprocessableEntity($signInRequest->getViolations(asArray: true));
             }
 
             $authInfo = $this->query(

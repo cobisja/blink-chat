@@ -34,7 +34,7 @@ class ApiResponse extends JsonResponse
 
     public static function unprocessableEntity($data = null): self
     {
-        return self::fromPayload($data, self::HTTP_UNPROCESSABLE_ENTITY);
+        return self::fromPayload(['error' => $data], self::HTTP_UNPROCESSABLE_ENTITY);
     }
 
     public static function unauthorized($data = null): self

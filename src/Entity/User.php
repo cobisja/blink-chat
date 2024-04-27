@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use JetBrains\PhpStorm\ArrayShape;
 use Symfony\Bridge\Doctrine\Types\UuidType;
@@ -13,6 +14,7 @@ use Symfony\Component\Uid\Uuid;
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`users`')]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
+#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_NICKNAME', fields: ['nickname'])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     final public const PASSWORD_MIN_LENGTH = 6;
@@ -23,14 +25,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
     private ?Uuid $id = null;
 
-    #[ORM\Column(length: 180)]
+    #[ORM\Column(length: 180, unique: true)]
     private ?string $email = null;
 
     /**
-     * @var list<string> The user roles
+     * @var list<string>
      */
     #[ORM\Column]
-    private array $roles = [];
+    private array $roles;
 
     #[ORM\Column]
     private ?string $password = null;
@@ -41,11 +43,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255)]
     private ?string $lastname = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 16, unique: true)]
     private ?string $nickname = null;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
+    private ?DateTimeImmutable $createdAt = null;
+
+    public function __construct()
+    {
+        $this->roles = ['ROLE_USER'];
+        $this->createdAt = new DateTimeImmutable();
+    }
 
     public function getId(): ?Uuid
     {
@@ -150,12 +158,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getCreatedAt(): ?DateTimeImmutable
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    public function setCreatedAt(DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
 
