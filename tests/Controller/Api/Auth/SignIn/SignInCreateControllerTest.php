@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Controller\Api\Auth\SignIn;
 
 use App\Entity\User;
+use App\Repository\UserRepository;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -16,7 +17,7 @@ class SignInCreateControllerTest extends WebTestCase
 
     private ?ObjectManager $entityManager;
     private KernelBrowser $client;
-    private $userRepository;
+    private UserRepository $userRepository;
 
     protected function setUp(): void
     {
@@ -48,9 +49,17 @@ class SignInCreateControllerTest extends WebTestCase
      */
     public function it_should_returns_code_401_with_bad_credentials(): void
     {
-        /** @var User $user */
-        $user = $this->userRepository->findOneBy(['email' => 'john.doe@example.com']);
-        $content = ['email' => $user->getEmail(), 'password' => '*this-is-not-a-password*'];
+        $userData = [
+            'email' => 'test@test.test',
+            'password' => 'test-test',
+            'name' => 'test',
+            'lastname' => 'test',
+            'nickname' => 'test-test'
+        ];
+
+        $this->createTestUser($userData);
+
+        $content = ['email' => $userData['email'], 'password' => $userData['password'] . '*--test--*'];
 
         $this->client->request(
             method: 'POST',
@@ -81,13 +90,13 @@ class SignInCreateControllerTest extends WebTestCase
         $response = json_decode($this->client->getResponse()->getContent(), associative: true);
 
         $this->assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
-        $this->assertArrayHasKey('errors', $response);
-        $this->assertCount($errorCount, $response['errors']);
+        $this->assertArrayHasKey('error', $response);
+        $this->assertCount($errorCount, $response['error']);
 
         foreach (range(0, $errorCount - 1) as $index) {
-            $this->assertTrue(in_array('propertyPath', array_keys($response['errors'][$index])));
-            $this->assertTrue(in_array('message', array_keys($response['errors'][$index])));
-            $this->assertSame($propertyPath[$index], $response['errors'][$index]['propertyPath']);
+            $this->assertTrue(in_array('propertyPath', array_keys($response['error'][$index])));
+            $this->assertTrue(in_array('message', array_keys($response['error'][$index])));
+            $this->assertSame($propertyPath[$index], $response['error'][$index]['propertyPath']);
         }
     }
 
@@ -96,17 +105,24 @@ class SignInCreateControllerTest extends WebTestCase
      */
     public function it_should_returns_code_200_with_auth_data_in_the_response(): void
     {
-        /** @var User $expectedUser */
-        $expectedUser = $this->userRepository->findOneBy(['email' => 'john.doe@example.com']);
-        $content = ['email' => $expectedUser->getEmail(), 'password' => '123456'];
+        $userData = [
+            'email' => 'test@test.test',
+            'password' => 'test-test',
+            'name' => 'test',
+            'lastname' => 'test',
+            'nickname' => 'test-test'
+        ];
+
+        $this->createTestUser($userData);
 
         $this->client->request(
             method: 'POST',
             uri: self::SIGN_IN_URI,
             server: ['Content-Type' => 'application/json'],
-            content: json_encode($content)
+            content: json_encode(['email' => $userData['email'], 'password' => $userData['password']])
         );
 
+        $expectedUser = $this->userRepository->findByEmail($userData['email']);
         $response = json_decode($this->client->getResponse()->getContent(), associative: true);
 
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
@@ -131,6 +147,19 @@ class SignInCreateControllerTest extends WebTestCase
         $this->entityManager = null;
     }
 
+    private function createTestUser(array $userData): void
+    {
+        $user = new User();
+
+        $user->setEmail($userData['email']);
+        $user->setPassword(password_hash($userData['password'], PASSWORD_DEFAULT));
+        $user->setName($userData['name']);
+        $user->setLastName($userData['lastname']);
+        $user->setNickname($userData['nickname']);
+
+        $this->userRepository->save($user);
+    }
+
     private function requestsContent(): array
     {
         return [
@@ -152,14 +181,9 @@ class SignInCreateControllerTest extends WebTestCase
         return [
             'invalid_email' => [
                 '{"email": "abc", "password": "123"}',
-                2,
-                ['email', 'password']
-            ],
-            'short_password' => [
-                '{"email": "john.doe@example.org", "password": "123"}',
                 1,
-                ['password']
-            ],
+                ['email', 'password']
+            ]
         ];
     }
 }

@@ -15,7 +15,6 @@ readonly class SignInCreateRequest
         public ?string $email,
 
         #[Assert\NotBlank]
-        #[Assert\Length(min: User::PASSWORD_MIN_LENGTH)]
         public ?string $password,
     ) {
     }

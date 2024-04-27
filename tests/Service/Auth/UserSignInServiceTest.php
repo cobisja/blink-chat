@@ -36,7 +36,7 @@ class UserSignInServiceTest extends TestCase
 
         $this->userRepository
             ->expects($this->once())
-            ->method('findOneBy')
+            ->method('findByEmail')
             ->willReturn(null);
 
         (new UserSignInService($this->userRepository, $this->JWTManager))(
@@ -64,7 +64,7 @@ class UserSignInServiceTest extends TestCase
 
         $this->userRepository
             ->expects($this->once())
-            ->method('findOneBy')
+            ->method('findByEmail')
             ->willReturn($user);
 
         (new UserSignInService($this->userRepository, $this->JWTManager))(
@@ -90,7 +90,7 @@ class UserSignInServiceTest extends TestCase
 
         $this->userRepository
             ->expects($this->once())
-            ->method('findOneBy')
+            ->method('findByEmail')
             ->willReturn($user);
 
         $this->JWTManager
