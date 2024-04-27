@@ -22,14 +22,14 @@ abstract class ApiController extends AbstractController
     {
     }
 
-    public function query($query)
+    public function query($message)
     {
-        return $this->handleMessage($query, getReturnedValue: true);
+        return $this->handleMessage($message, getReturnedValue: true);
     }
 
-    public function dispatch($command): void
+    public function dispatch($message): void
     {
-        $this->handleMessage($command);
+        $this->handleMessage($message);
     }
 
     /**

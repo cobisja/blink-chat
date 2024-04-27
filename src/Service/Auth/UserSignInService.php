@@ -26,7 +26,7 @@ readonly class UserSignInService
     ])]
     public function __invoke(string $email, string $password): array
     {
-        if (!$user = $this->userRepository->findOneBy(['email' => $email])) {
+        if (!$user = $this->userRepository->findByEmail($email)) {
             throw new BadCredentialsException();
         }
 
