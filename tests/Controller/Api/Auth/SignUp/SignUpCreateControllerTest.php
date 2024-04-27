@@ -177,6 +177,14 @@ class SignUpCreateControllerTest extends WebTestCase
         $this->userRepository->save($user);
     }
 
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+
+        $this->entityManager->close();
+        $this->entityManager = null;
+    }
+
     private function requestsContent(): array
     {
         return [
