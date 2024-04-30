@@ -17,14 +17,14 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/api')]
 class EmailAvailabilityShowController extends ApiController
 {
-    #[Route('/emails/availability', name: 'api_email_availability_show', methods: ['POST'])]
+    #[Route('/emails/availability', name: 'api_emails_availability_show', methods: ['GET'])]
     public function __invoke(
         Request $request,
         RequestValidator $requestValidator,
         EmailAvailabilityShowTransformer $availabilityShowTransformer
     ): ApiResponse {
         try {
-            $email = $this->decodeRequest($request)['email'] ?? null;
+            $email = $request->query->get('email');
 
             $emailAvailabilityShowRequest = $requestValidator->validate(
                 new EmailAvailabilityShowRequest($email)
