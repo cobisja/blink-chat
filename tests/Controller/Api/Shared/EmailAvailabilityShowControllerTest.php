@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class EmailAvailabilityShowControllerTest extends WebTestCase
 {
-    final public const EMAIL_AVAILABILITY_URI = '/api/email/availability';
+    final public const EMAIL_AVAILABILITY_URI = '/api/emails/availability';
 
     private KernelBrowser $client;
     private EntityManagerInterface $entityManager;
@@ -22,34 +22,6 @@ class EmailAvailabilityShowControllerTest extends WebTestCase
         $this->client = static::createClient();
         $this->entityManager = self::getContainer()->get('doctrine')?->getManager();
         $this->userRepository = $this->entityManager->getRepository(User::class);
-    }
-
-    /**
-     * @test
-     * @dataProvider requestsContent
-     */
-    public function it_should_returns_a_non_ok_code_with_malformed_or_missing_parameters(
-        string $content,
-        int $expectedCode,
-        array $violations
-    ): void {
-        $this->client->request(
-            method: 'POST',
-            uri: self::EMAIL_AVAILABILITY_URI,
-            server: ['Content-Type' => 'application/json'],
-            content: $content
-        );
-
-        $response = json_decode($this->client->getResponse()->getContent(), associative: true);
-
-        $this->assertResponseStatusCodeSame($expectedCode);
-        $this->assertArrayHasKey('error', $response);
-
-        foreach ($violations as $index => $violation) {
-            $this->assertArrayHasKey('propertyPath', $violation);
-            $this->assertArrayHasKey('message', $violation);
-            $this->assertSame($violation['propertyPath'], $response['error'][$index]['propertyPath']);
-        }
     }
 
     /**
@@ -73,10 +45,9 @@ class EmailAvailabilityShowControllerTest extends WebTestCase
         $userData['email'] = $email;
 
         $this->client->request(
-            method: 'POST',
+            method: 'GET',
             uri: self::EMAIL_AVAILABILITY_URI,
-            server: ['Content-Type' => 'application/json'],
-            content: json_encode($userData)
+            parameters: ['email' => $userData['email']]
         );
 
         $response = json_decode($this->client->getResponse()->getContent(), associative: true);
@@ -99,56 +70,6 @@ class EmailAvailabilityShowControllerTest extends WebTestCase
         $user->setNickname($userData['nickname']);
 
         $this->userRepository->save($user);
-    }
-
-    private function requestsContent(): array
-    {
-        return [
-
-            'malformed_json_request' => [
-                '{',
-                Response::HTTP_BAD_REQUEST,
-                [
-                    [
-                        'propertyPath' => null,
-                        'message' => 'Syntax error'
-                    ]
-                ]
-            ],
-
-            'empty_request' => [
-                '{}',
-                Response::HTTP_UNPROCESSABLE_ENTITY,
-                [
-                    [
-                        "propertyPath" => "email",
-                        "message" => "This value should not be blank."
-                    ],
-                ]
-            ],
-
-            'empty_email' => [
-                '{ "email": "" }',
-                Response::HTTP_UNPROCESSABLE_ENTITY,
-                [
-                    [
-                        "propertyPath" => "email",
-                        "message" => "This value should not be blank."
-                    ],
-                ]
-            ],
-
-            'invalid_email' => [
-                '{ "email": "test.test" }',
-                Response::HTTP_UNPROCESSABLE_ENTITY,
-                [
-                    [
-                        "propertyPath" => "email",
-                        "message" => "This value is not a valid email address."
-                    ],
-                ]
-            ],
-        ];
     }
 
     private function availabilityContent(): array
