@@ -47,6 +47,16 @@ class ApiResponse extends JsonResponse
         return self::fromPayload(['error' => $data], self::HTTP_FORBIDDEN);
     }
 
+    public static function conflict($data = null): self
+    {
+        return self::fromPayload(['error' => $data], self::HTTP_CONFLICT);
+    }
+
+    public static function serviceUnavailable($data = null): self
+    {
+        return self::fromPayload(['error' => $data], self::HTTP_SERVICE_UNAVAILABLE);
+    }
+
     public static function fromPayload(array $payload, int $status): self
     {
         return new self($payload, $status);
