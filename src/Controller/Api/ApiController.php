@@ -27,9 +27,9 @@ abstract class ApiController extends AbstractController
         return $this->handleMessage($message, getReturnedValue: true);
     }
 
-    public function dispatch($message): void
+    public function dispatch($message, bool $getReturnedValue = false)
     {
-        $this->handleMessage($message);
+        return $this->handleMessage($message, $getReturnedValue);
     }
 
     /**
