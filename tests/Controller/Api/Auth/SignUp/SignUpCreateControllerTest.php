@@ -57,10 +57,10 @@ class SignUpCreateControllerTest extends WebTestCase
     /**
      * @test
      */
-    public function it_should_returns_code_422_with_an_email_already_taken(): void
+    public function it_should_returns_code_409_with_an_email_already_taken(): void
     {
         $expectedErrorMessage = 'Email already taken';
-        $expectedCode = Response::HTTP_UNPROCESSABLE_ENTITY;
+        $expectedCode = Response::HTTP_CONFLICT;
 
         $userData = [
             'email' => 'test@test.test',
@@ -91,9 +91,9 @@ class SignUpCreateControllerTest extends WebTestCase
     /**
      * @test
      */
-    public function it_should_returns_code_422_when_the_nickname_is_already_taken(): void
+    public function it_should_returns_code_409_when_the_nickname_is_already_taken(): void
     {
-        $expectedCode = Response::HTTP_UNPROCESSABLE_ENTITY;
+        $expectedCode = Response::HTTP_CONFLICT;
         $expectedErrorMessage = 'Nickname already taken';
 
         $userData = [
