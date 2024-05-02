@@ -57,7 +57,7 @@ class ApiResponse extends JsonResponse
         return self::fromPayload(['error' => $data], self::HTTP_SERVICE_UNAVAILABLE);
     }
 
-    public static function fromPayload(array $payload, int $status): self
+    public static function fromPayload(?array $payload, int $status): self
     {
         return new self($payload, $status);
     }

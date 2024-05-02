@@ -162,6 +162,12 @@ class SignUpCreateControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame($expectedCode);
         $this->assertEquals($expectedUserData, $actualUserData);
         $this->assertEquals($expectedUserRoles, $actualUserRoles);
+
+        $this->assertEmailCount(1);
+
+        $email = $this->getMailerMessage();
+
+        $this->assertEmailHtmlBodyContains($email, 'Welcome to Blink-Chat!');
     }
 
     private function createTestUser(array $userData): void

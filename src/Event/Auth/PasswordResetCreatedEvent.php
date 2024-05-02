@@ -8,20 +8,20 @@ use DateTimeImmutable;
 use JetBrains\PhpStorm\ArrayShape;
 use Symfony\Contracts\EventDispatcher\Event;
 
-class UserRegisteredEvent extends Event
+class PasswordResetCreatedEvent extends Event
 {
-    public function __construct(private readonly string $userId)
+    public function __construct(private readonly string $email)
     {
     }
 
     #[ArrayShape([
-        'user_id' => "string",
+        'email' => "string",
         'occurred_on' => "\DateTimeImmutable"
     ])]
     public function payload(): array
     {
         return [
-            'user_id' => $this->userId,
+            'email' => $this->email,
             'occurred_on' => new DateTimeImmutable()
         ];
     }

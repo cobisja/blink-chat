@@ -190,4 +190,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             'created_at' => $this->createdAt,
         ];
     }
+
+    public function getFullName(bool $emailAsFallback = false): string
+    {
+        $fullName = trim($this->name . ' ' . $this->lastname);
+
+        if (!$fullName && $emailAsFallback) {
+            return $this->email;
+        }
+
+        return $fullName;
+    }
 }
