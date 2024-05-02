@@ -18,15 +18,30 @@ class PasswordResetRepository extends BaseRepository
     public function findByEmail(string $email): ?PasswordReset
     {
         try {
-            $user = $this->createQueryBuilder('pr')
+            $passwordReset = $this->createQueryBuilder('pr')
                 ->where('pr.email = :email')
                 ->setParameter('email', $email)
                 ->getQuery()
                 ->getOneOrNullResult();
         } catch (NonUniqueResultException) {
-            $user = null;
+            $passwordReset = null;
         }
 
-        return $user;
+        return $passwordReset;
+    }
+
+    public function findByToken(string $token): ?PasswordReset
+    {
+        try {
+            $passwordReset = $this->createQueryBuilder('pr')
+                ->where('pr.token = :token')
+                ->setParameter('token', $token)
+                ->getQuery()
+                ->getOneOrNullResult();
+        } catch (NonUniqueResultException) {
+            $passwordReset = null;
+        }
+
+        return $passwordReset;
     }
 }
