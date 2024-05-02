@@ -4,9 +4,7 @@ namespace App\Entity;
 
 use App\Exception\Auth\ResetTokenCannotBeCreatedException;
 use App\Repository\PasswordResetRepository;
-use DateInterval;
 use DateTimeImmutable;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Random\RandomException;
 use Symfony\Bridge\Doctrine\Types\UuidType;
@@ -28,7 +26,7 @@ class PasswordReset
     #[ORM\Column(length: 180, unique: true)]
     private ?string $email = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, unique: true)]
     private ?string $token = null;
 
     #[ORM\Column]
@@ -69,6 +67,11 @@ class PasswordReset
         return $this->validUntil;
     }
 
+    public function setValidUntil(DateTimeImmutable $validUntil): void
+    {
+        $this->validUntil = $validUntil;
+    }
+
     /**
      * @throws ResetTokenCannotBeCreatedException
      */
@@ -76,11 +79,14 @@ class PasswordReset
     {
         try {
             $this->token = sha1(random_bytes(self::CODE_LENGTH));
+            $this->validUntil = new DateTimeImmutable(self::CODE_TTL);
         } catch (RandomException) {
             throw new ResetTokenCannotBeCreatedException();
         }
-        $this->validUntil = (new DateTimeImmutable())->add(
-            DateInterval::createFromDateString(self::CODE_TTL)
-        );
+    }
+
+    public function isExpired(): bool
+    {
+        return $this->validUntil < new DateTimeImmutable();
     }
 }
