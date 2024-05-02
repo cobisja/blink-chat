@@ -172,6 +172,12 @@ class PasswordsResetsUpdateControllerTest extends WebTestCase
         $this->assertTrue(
             password_verify($newPassword, $user->getPassword())
         );
+
+        $this->assertEmailCount(1);
+
+        $email = $this->getMailerMessage();
+
+        $this->assertEmailHtmlBodyContains($email, 'Your password has changed');
     }
 
     private function requestsContent(): array
