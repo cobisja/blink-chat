@@ -56,7 +56,7 @@ readonly class UserSignUpService
         $this->userRepository->save($user);
 
         $this->eventDispatcher->dispatch(
-            new UserRegisteredEvent($user)
+            new UserRegisteredEvent((string)$user->getId())
         );
     }
 }

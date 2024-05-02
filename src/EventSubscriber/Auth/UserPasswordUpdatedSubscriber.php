@@ -20,10 +20,8 @@ readonly class UserPasswordUpdatedSubscriber implements EventSubscriberInterface
         ];
     }
 
-    public function __construct(
-        private MailerInterface $mailer,
-        private UserRepository $userRepository
-    ) {
+    public function __construct(private MailerInterface $mailer, private UserRepository $userRepository)
+    {
     }
 
     /**
