@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Repository\UserRepository;
 use DateTimeImmutable;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JetBrains\PhpStorm\ArrayShape;
 use Symfony\Bridge\Doctrine\Types\UuidType;
@@ -28,9 +30,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 180, unique: true)]
     private ?string $email = null;
 
-    /**
-     * @var list<string>
-     */
     #[ORM\Column]
     private array $roles;
 
@@ -49,10 +48,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?DateTimeImmutable $createdAt = null;
 
+    #[ORM\ManyToMany(targetEntity: Chat::class, mappedBy: 'participants')]
+    private Collection $chats;
+
+    #[ORM\OneToMany(targetEntity: ChatBlockedUser::class, mappedBy: 'blockerUser')]
+    private Collection $blockedUsers;
+
     public function __construct()
     {
         $this->roles = ['ROLE_USER'];
         $this->createdAt = new DateTimeImmutable();
+        $this->chats = new ArrayCollection();
+        $this->blockedUsers = new ArrayCollection();
     }
 
     public function getId(): ?Uuid
@@ -200,5 +207,62 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         return $fullName;
+    }
+
+    /**
+     * @return Collection<int, Chat>
+     */
+    public function getChats(): Collection
+    {
+        return $this->chats;
+    }
+
+    public function addChat(Chat $chat): static
+    {
+        if (!$this->chats->contains($chat)) {
+            $this->chats->add($chat);
+            $chat->addParticipant($this);
+        }
+
+        return $this;
+    }
+
+    public function removeChat(Chat $chat): static
+    {
+        if ($this->chats->removeElement($chat)) {
+            $chat->removeParticipant($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ChatBlockedUser>
+     */
+    public function getBlockedUsers(): Collection
+    {
+        return $this->blockedUsers;
+    }
+
+    public function addBlockedUser(ChatBlockedUser $blockedUser): static
+    {
+        if (!$this->blockedUsers->contains($blockedUser)) {
+            $this->blockedUsers->add($blockedUser);
+            $blockedUser->setBlockerUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBlockedUser(ChatBlockedUser $blockedUser): static
+    {
+        if ($this->blockedUsers->removeElement($blockedUser)) {
+            // set the owning side to null (unless already changed)
+            if ($blockedUser->getBlockerUser() === $this) {
+                $blockedUser->setBlockerUser(null);
+            }
+        }
+
+        return $this;
     }
 }
