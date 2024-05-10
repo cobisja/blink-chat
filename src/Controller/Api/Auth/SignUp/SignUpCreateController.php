@@ -60,8 +60,6 @@ class SignUpCreateController extends ApiController
             return ApiResponse::badRequest([
                 ['propertyPath' => null, 'message' => $exception->getMessage()]
             ]);
-        } catch (PasswordConfirmationDoesNotMatchException $exception) {
-            return ApiResponse::unprocessableEntity(['message' => $exception->getMessage()]);
         } catch (EmailAlreadyTakenException $exception) {
             return ApiResponse::conflict(['propertyPath' => 'email', 'message' => $exception->getMessage()]);
         } catch (NicknameAlreadyTakenException $exception) {

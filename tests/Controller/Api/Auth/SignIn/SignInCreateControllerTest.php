@@ -4,27 +4,12 @@ declare(strict_types=1);
 
 namespace App\Tests\Controller\Api\Auth\SignIn;
 
-use App\Entity\User;
-use App\Repository\UserRepository;
-use Doctrine\Persistence\ObjectManager;
-use Symfony\Bundle\FrameworkBundle\KernelBrowser;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use App\Tests\Controller\Api\ApiWebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 
-class SignInCreateControllerTest extends WebTestCase
+class SignInCreateControllerTest extends ApiWebTestCase
 {
     final public const SIGN_IN_URI = '/api/sign-in';
-
-    private ?ObjectManager $entityManager;
-    private KernelBrowser $client;
-    private UserRepository $userRepository;
-
-    protected function setUp(): void
-    {
-        $this->client = static::createClient();
-        $this->entityManager = self::getContainer()->get('doctrine')?->getManager();
-        $this->userRepository = $this->entityManager->getRepository(User::class);
-    }
 
     /**
      * @test
@@ -137,27 +122,6 @@ class SignInCreateControllerTest extends WebTestCase
         $this->assertSame($expectedUser->getNickname(), $response['data']['user']['nickname']);
         $this->assertSame($expectedUser->getRoles(), $response['data']['user']['roles']);
         $this->assertSame($expectedUser->getCreatedAt()->getTimestamp(), $response['data']['user']['created_at']);
-    }
-
-    protected function tearDown(): void
-    {
-        parent::tearDown();
-
-        $this->entityManager->close();
-        $this->entityManager = null;
-    }
-
-    private function createTestUser(array $userData): void
-    {
-        $user = new User();
-
-        $user->setEmail($userData['email']);
-        $user->setPassword(password_hash($userData['password'], PASSWORD_DEFAULT));
-        $user->setName($userData['name']);
-        $user->setLastName($userData['lastname']);
-        $user->setNickname($userData['nickname']);
-
-        $this->userRepository->save($user);
     }
 
     private function requestsContent(): array

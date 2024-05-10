@@ -26,7 +26,7 @@ class Chat
     private ?\DateTimeImmutable $updatedAt = null;
 
     #[ORM\OneToMany(targetEntity: ChatMessage::class, mappedBy: 'chat')]
-    #[ORM\OrderBy(['sendAt' => 'DESC'])]
+    #[ORM\OrderBy(['sentAt' => 'DESC'])]
     private Collection $messages;
 
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'chats')]

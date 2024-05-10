@@ -2,25 +2,12 @@
 
 namespace App\Tests\Controller\Api\Auth\Passwords;
 
-use App\Entity\User;
-use App\Repository\UserRepository;
-use Symfony\Bundle\FrameworkBundle\KernelBrowser;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use App\Tests\Controller\Api\ApiWebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 
-class PasswordsResetsCreateControllerTest extends WebTestCase
+class PasswordsResetsCreateControllerTest extends ApiWebTestCase
 {
     final public const PASSWORDS_RESETS_URI = '/api/passwords_resets';
-
-    private KernelBrowser $client;
-    private UserRepository $userRepository;
-
-    protected function setUp(): void
-    {
-        $this->client = static::createClient();
-        $entityManager = self::getContainer()->get('doctrine')?->getManager();
-        $this->userRepository = $entityManager->getRepository(User::class);
-    }
 
     /**
      * @test
@@ -104,19 +91,6 @@ class PasswordsResetsCreateControllerTest extends WebTestCase
         $email = $this->getMailerMessage();
 
         $this->assertEmailHtmlBodyContains($email, 'Reset password instructions');
-    }
-
-    private function createTestUser(array $userData): void
-    {
-        $user = new User();
-
-        $user->setEmail($userData['email']);
-        $user->setPassword(password_hash($userData['password'], PASSWORD_DEFAULT));
-        $user->setName($userData['name']);
-        $user->setLastName($userData['lastname']);
-        $user->setNickname($userData['nickname']);
-
-        $this->userRepository->save($user);
     }
 
     private function requestsContent(): array

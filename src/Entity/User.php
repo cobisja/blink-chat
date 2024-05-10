@@ -42,11 +42,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255)]
     private ?string $lastname = null;
 
-    #[ORM\Column(length: 16, unique: true)]
+    #[ORM\Column(length: 20, unique: true)]
     private ?string $nickname = null;
 
     #[ORM\Column]
     private ?DateTimeImmutable $createdAt = null;
+
+    #[ORM\Column(type: 'text')]
+    private ?string $queryField = null;
 
     #[ORM\ManyToMany(targetEntity: Chat::class, mappedBy: 'participants')]
     private Collection $chats;
@@ -207,6 +210,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         return $fullName;
+    }
+
+    public function getQueryField(): ?string
+    {
+        return $this->queryField;
+    }
+
+    public function setQueryField(): void
+    {
+        $this->queryField = strtolower($this->name . $this->lastname . $this->email);
     }
 
     /**

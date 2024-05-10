@@ -4,6 +4,8 @@ namespace App\Factory;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
+use App\Service\Shared\NicknameRandomService;
+use DateTimeImmutable;
 use Zenstruck\Foundry\ModelFactory;
 use Zenstruck\Foundry\Proxy;
 use Zenstruck\Foundry\RepositoryProxy;
@@ -50,11 +52,13 @@ final class UserFactory extends ModelFactory
     protected function getDefaults(): array
     {
         return [
-            'createdAt' => \DateTimeImmutable::createFromMutable(self::faker()->dateTime()),
+            'createdAt' => DateTimeImmutable::createFromMutable(self::faker()->dateTime()),
             'email' => self::faker()->unique()->safeEmail(),
-            'lastname' => self::faker()->lastName(),
-            'name' => self::faker()->firstName(),
-            'nickname' => self::faker()->unique()->word(),
+            'lastname' => strtolower(self::faker()->lastName()),
+            'name' => strtolower(self::faker()->firstName()),
+            'nickname' => NicknameRandomService::generateNickname(
+                strtolower(self::faker()->firstName()),
+            ),
             'password' => password_hash(self::DEFAULT_PASSWORD, PASSWORD_DEFAULT),
             'roles' => self::DEFAULT_ROLES,
         ];
@@ -66,7 +70,9 @@ final class UserFactory extends ModelFactory
     protected function initialize(): self
     {
         return $this
-            // ->afterInstantiate(function(User $user): void {})
+             ->afterInstantiate(function(User $user): void {
+                 $user->setQueryField();
+             })
         ;
     }
 

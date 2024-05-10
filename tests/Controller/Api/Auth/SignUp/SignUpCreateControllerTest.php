@@ -4,27 +4,12 @@ declare(strict_types=1);
 
 namespace App\Tests\Controller\Api\Auth\SignUp;
 
-use App\Entity\User;
-use App\Repository\UserRepository;
-use Doctrine\Persistence\ObjectManager;
-use Symfony\Bundle\FrameworkBundle\KernelBrowser;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use App\Tests\Controller\Api\ApiWebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 
-class SignUpCreateControllerTest extends WebTestCase
+class SignUpCreateControllerTest extends ApiWebTestCase
 {
     final public const SIGN_UP_URI = '/api/sign-up';
-
-    private ?ObjectManager $entityManager;
-    private KernelBrowser $client;
-    private UserRepository $userRepository;
-
-    protected function setUp(): void
-    {
-        $this->client = static::createClient();
-        $this->entityManager = self::getContainer()->get('doctrine')?->getManager();
-        $this->userRepository = $this->entityManager->getRepository(User::class);
-    }
 
     /**
      * @test
@@ -105,6 +90,7 @@ class SignUpCreateControllerTest extends WebTestCase
         ];
 
         $this->createTestUser($userData);
+
         $userData['email'] = 'test-test@test.test';
         $userData['password_confirmation'] = $userData['password'];
 
@@ -148,7 +134,8 @@ class SignUpCreateControllerTest extends WebTestCase
             content: json_encode($expectedUserData)
         );
 
-        $actualUserData = $this->userRepository->findByEmail($expectedUserData['email'])->data();
+        $byEmail = $this->userRepository->findByEmail($expectedUserData['email']);
+        $actualUserData = $byEmail->data();
         $actualUserRoles = $actualUserData['roles'];
 
         unset(
@@ -168,27 +155,6 @@ class SignUpCreateControllerTest extends WebTestCase
         $email = $this->getMailerMessage();
 
         $this->assertEmailHtmlBodyContains($email, 'Welcome to Blink-Chat!');
-    }
-
-    private function createTestUser(array $userData): void
-    {
-        $user = new User();
-
-        $user->setEmail($userData['email']);
-        $user->setPassword(password_hash($userData['password'], PASSWORD_DEFAULT));
-        $user->setName($userData['name']);
-        $user->setLastName($userData['lastname']);
-        $user->setNickname($userData['nickname']);
-
-        $this->userRepository->save($user);
-    }
-
-    protected function tearDown(): void
-    {
-        parent::tearDown();
-
-        $this->entityManager->close();
-        $this->entityManager = null;
     }
 
     private function requestsContent(): array

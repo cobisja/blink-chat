@@ -3,32 +3,22 @@
 namespace App\Tests\Controller\Api\Auth\Passwords;
 
 use App\Entity\PasswordReset;
-use App\Entity\User;
 use App\Repository\PasswordResetRepository;
-use App\Repository\UserRepository;
+use App\Tests\Controller\Api\ApiWebTestCase;
 use DateTimeImmutable;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\KernelBrowser;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 
-class PasswordsResetsUpdateControllerTest extends WebTestCase
+class PasswordsResetsUpdateControllerTest extends ApiWebTestCase
 {
     final public const PASSWORDS_RESETS_URI = '/api/passwords_resets';
 
-    private KernelBrowser $client;
+
     private PasswordResetRepository $passwordResetRepository;
-    private UserRepository $userRepository;
 
     protected function setUp(): void
     {
-        $this->client = static::createClient();
-
-        /** @var EntityManagerInterface $entityManager */
-        $entityManager = self::getContainer()->get('doctrine')?->getManager();
-
-        $this->userRepository = $entityManager->getRepository(User::class);
-        $this->passwordResetRepository = $entityManager->getRepository(PasswordReset::class);
+        parent::setUp();
+        $this->passwordResetRepository = $this->entityManager->getRepository(PasswordReset::class);
     }
 
     /**
@@ -129,24 +119,18 @@ class PasswordsResetsUpdateControllerTest extends WebTestCase
     public function it_should_resets_the_password(): void
     {
         $expectedCode = Response::HTTP_NO_CONTENT;
+        $oldPassword = 'test-test';
         $newPassword = "test-test-test";
 
         $userData = [
             'email' => 'test@test.test',
-            'password' => 'test-test',
+            'password' => $oldPassword,
             'name' => 'test',
             'lastname' => 'test',
             'nickname' => 'test-test'
         ];
 
-        $user = new User();
-        $user->setEmail($userData['email']);
-        $user->setPassword(password_hash($userData['password'], PASSWORD_DEFAULT));
-        $user->setName($userData['name']);
-        $user->setLastname($userData['lastname']);
-        $user->setNickname($userData['nickname']);
-
-        $this->userRepository->save($user);
+        $user = $this->createTestUser($userData);
 
         $passwordReset = new PasswordReset();
         $passwordReset->setEmail($user->getEmail());
@@ -159,8 +143,6 @@ class PasswordsResetsUpdateControllerTest extends WebTestCase
             server: ['Content-Type' => 'application/json'],
             content: json_encode(['password' => $newPassword])
         );
-
-        $response = json_decode($this->client->getResponse()->getContent(), associative: true);
 
         $this->assertResponseStatusCodeSame($expectedCode);
         $this->assertNull(

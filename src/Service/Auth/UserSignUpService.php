@@ -52,6 +52,7 @@ readonly class UserSignUpService
         $user->setName($name);
         $user->setLastname($lastname);
         $user->setNickname($nickname);
+        $user->setQueryField();
 
         $this->userRepository->save($user);
 
