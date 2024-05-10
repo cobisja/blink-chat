@@ -10,7 +10,6 @@ use App\Controller\Api\RequestValidator;
 use App\Controller\Api\Shared\Request\EmailAvailabilityShowRequest;
 use App\Controller\Api\Transformer\Shared\EmailAvailabilityShowTransformer;
 use App\Message\Shared\EmailAvailabilityShowMessage;
-use JsonException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -23,26 +22,20 @@ class EmailAvailabilityShowController extends ApiController
         RequestValidator $requestValidator,
         EmailAvailabilityShowTransformer $availabilityShowTransformer
     ): ApiResponse {
-        try {
-            $email = $request->query->get('email');
+        $email = $request->query->get('email');
 
-            $emailAvailabilityShowRequest = $requestValidator->validate(
-                new EmailAvailabilityShowRequest($email)
-            );
+        $emailAvailabilityShowRequest = $requestValidator->validate(
+            new EmailAvailabilityShowRequest($email)
+        );
 
-            if ($emailAvailabilityShowRequest->hasViolations()) {
-                return ApiResponse::unprocessableEntity($emailAvailabilityShowRequest->getViolations(asArray: true));
-            }
-
-            $emailAvailability = $this->query(
-                new EmailAvailabilityShowMessage($email)
-            );
-
-            return ApiResponse::ok(['data' => $availabilityShowTransformer->transform($emailAvailability)]);
-        } catch (JsonException $exception) {
-            return ApiResponse::badRequest([
-                ['propertyPath' => null, 'message' => $exception->getMessage()]
-            ]);
+        if ($emailAvailabilityShowRequest->hasViolations()) {
+            return ApiResponse::unprocessableEntity($emailAvailabilityShowRequest->getViolations(asArray: true));
         }
+
+        $emailAvailability = $this->query(
+            new EmailAvailabilityShowMessage($email)
+        );
+
+        return ApiResponse::ok(['data' => $availabilityShowTransformer->transform($emailAvailability)]);
     }
 }

@@ -3,7 +3,9 @@
 namespace App\Repository;
 
 use App\Entity\User;
+use Doctrine\Common\Collections\Order;
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\QueryBuilder;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
@@ -60,5 +62,38 @@ class UserRepository extends BaseRepository implements PasswordUpgraderInterface
         }
 
         return $user;
+    }
+
+    /**
+     * @return QueryBuilder|User[]
+     */
+    public function findBySearchQuery(
+        ?string $query,
+        ?string $sort = null,
+        bool $returnQueryBuilder = false
+    ): QueryBuilder|array {
+        $queryBuilder = $this->createQueryBuilder('u');
+
+        if ($query) {
+            $queryBuilder
+                ->where("u.queryField LIKE :query")
+                ->setParameter('query', '%' . $query . '%');
+        }
+
+        if ($sort) {
+            $sort = in_array(strtoupper($sort), [Order::Ascending->value, Order::Descending->value])
+                ? $sort
+                : Order::Ascending->value;
+
+            $queryBuilder
+                ->orderBy("u.name", $sort)
+                ->addOrderBy("u.lastname", $sort);
+        }
+
+        if ($returnQueryBuilder) {
+            return $queryBuilder;
+        }
+
+        return $queryBuilder->getQuery()->getResult();
     }
 }

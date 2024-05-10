@@ -9,7 +9,6 @@ use App\Controller\Api\ApiResponse;
 use App\Controller\Api\Transformer\Shared\NicknameRandomShowTransformer;
 use App\Exception\Shared\NicknameCouldNotBeGeneratedException;
 use App\Message\Shared\NicknameRandomShowMessage;
-use JsonException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 

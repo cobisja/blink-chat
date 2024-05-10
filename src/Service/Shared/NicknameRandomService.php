@@ -11,6 +11,21 @@ readonly class NicknameRandomService
 {
     final public const MAX_RETRIES = 10;
 
+    /**
+     * @param string|null $baseName
+     * @return string
+     */
+    public static function generateNickname(?string $baseName): string
+    {
+        $adjectives = ['happy', 'brave', 'curious', 'funny', 'smart', 'cute', 'dizzy', 'sad', 'mighty', 'ugly'];
+        $nouns = ['cat', 'dog', 'panda', 'bear', 'fox', 'lion', 'tiger', 'snake', 'eagle', 'hawk', 'fish', 'ant'];
+
+        $adjective = $adjectives[array_rand($adjectives)];
+        $noun = $baseName ?: $nouns[array_rand($nouns)];
+
+        return $adjective . $noun . rand(10, 99);
+    }
+
     public function __construct(private UserRepository $userRepository)
     {
     }
@@ -25,7 +40,7 @@ readonly class NicknameRandomService
         $baseName = strtolower(trim($baseName ?? ''));
 
         do {
-            $nickname = $this->generateNickname($baseName);
+            $nickname = self::generateNickname($baseName);
 
             if (!$this->userRepository->findByNickname($nickname)) {
                 return $nickname;
@@ -33,20 +48,5 @@ readonly class NicknameRandomService
         } while (--$retries);
 
         throw new NicknameCouldNotBeGeneratedException();
-    }
-
-    /**
-     * @param string $baseName
-     * @return string
-     */
-    public function generateNickname(string $baseName): string
-    {
-        $adjectives = ['happy', 'brave', 'curious', 'funny', 'smart'];
-        $nouns = ['cat', 'dog', 'panda', 'bear', 'fox'];
-
-        $adjective = $adjectives[array_rand($adjectives)];
-        $noun = $baseName ?: $nouns[array_rand($nouns)];
-
-        return $adjective . $noun . rand(10, 999);
     }
 }
